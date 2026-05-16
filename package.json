@@ -7,6 +7,15 @@
     ".": "./core/index.js",
     "./loader": "./core/register-loader.js"
   },
+  "bin": {
+    "mini-ssr": "./bin/cli.js"
+  },
+  "files": [
+    "core/",
+    "bin/",
+    "template/",
+    "README.md"
+  ],
   "scripts": {
     "build": "node --import ./core/register-loader.js build.js",
     "dev": "node --import ./core/register-loader.js build.js && node --import ./core/register-loader.js --watch server.js",
@@ -25,6 +34,7 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.7",
     "esbuild": "^0.25.4",
+    "express": "^5.1.0",
     "tailwindcss": "^4.1.7"
   }
 }
