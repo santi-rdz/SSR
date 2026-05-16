@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
 
@@ -17,8 +17,10 @@ if (command === 'init') {
   init();
 } else if (command === 'build') {
   runBuild();
+} else if (command === 'dev') {
+  runDev();
 } else {
-  console.log('Usage: mini-ssr <init|build>');
+  console.log('Usage: mini-ssr <init|build|dev>');
   process.exit(1);
 }
 
@@ -27,6 +29,44 @@ if (command === 'init') {
 async function runBuild() {
   const { build } = await import('../core/build.js');
   await build(TARGET_DIR);
+}
+
+// ── Dev ────────────────────────────────────────────
+
+async function runDev() {
+  await runBuild();
+
+  const loaderPath = path.join(__dirname, '..', 'core', 'register-loader.js');
+  const serverPath = path.join(TARGET_DIR, 'server.js');
+
+  let serverProcess = null;
+
+  function startServer() {
+    if (serverProcess) serverProcess.kill();
+    serverProcess = spawn('node', ['--import', loaderPath, serverPath], {
+      stdio: 'inherit',
+      cwd: TARGET_DIR,
+    });
+  }
+
+  startServer();
+
+  const srcDir = path.join(TARGET_DIR, 'src');
+  fs.watch(srcDir, { recursive: true }, async (event, filename) => {
+    if (!filename) return;
+    console.log(`\n[dev] ${filename} changed, rebuilding...`);
+    try {
+      await runBuild();
+      startServer();
+    } catch (err) {
+      console.error('[dev] Build error:', err.message);
+    }
+  });
+
+  process.on('SIGINT', () => {
+    if (serverProcess) serverProcess.kill();
+    process.exit(0);
+  });
 }
 
 // ── Init ───────────────────────────────────────────
@@ -76,7 +116,7 @@ async function init() {
     pkg.type = pkg.type || 'module';
     pkg.scripts = pkg.scripts || {};
     pkg.scripts.build = pkg.scripts.build || 'mini-ssr build';
-    pkg.scripts.dev = pkg.scripts.dev || 'mini-ssr build && node --import mini-ssr/loader --watch server.js';
+    pkg.scripts.dev = pkg.scripts.dev || 'mini-ssr dev';
     pkg.scripts.start = pkg.scripts.start || 'node --import mini-ssr/loader server.js';
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
     console.log('\n  + scripts agregados a package.json');
@@ -92,6 +132,5 @@ async function init() {
   }
 
   console.log('\nListo. Ejecuta:\n');
-  console.log('  pnpm build');
-  console.log('  pnpm start\n');
+  console.log('  pnpm dev\n');
 }

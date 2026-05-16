@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "node --import ./core/register-loader.js ./bin/cli.js build",
-    "dev": "node --import ./core/register-loader.js ./bin/cli.js build && node --import ./core/register-loader.js --watch server.js",
+    "dev": "node --import ./core/register-loader.js ./bin/cli.js dev",
     "start": "node --import ./core/register-loader.js server.js"
   },
   "peerDependencies": {
