@@ -26,31 +26,41 @@ Framework SSR minimalista para React. Renderiza en el servidor, hidrata solo lo 
 └──────────────────────────────┘
 ```
 
-## Instalacion
+## Instalacion en un proyecto nuevo
 
 ```bash
-pnpm install
+mkdir mi-proyecto && cd mi-proyecto
+pnpm init
+pnpm add github:santi-rdz/SSR
+npx mini-ssr init
+```
+
+El CLI te pregunta si quieres instalar las dependencias (react, express, esbuild, tailwindcss). Di `s` y listo.
+
+Despues:
+
+```bash
 pnpm build
 pnpm start        # → http://localhost:3000
 ```
 
-## Estructura
+## Que genera `mini-ssr init`
 
 ```
-├── core/                  # Framework
-│   ├── loader.js          # Node entiende .jsx
-│   ├── renderer.jsx       # React → HTML
-│   ├── bundler.js         # esbuild para client components
-│   └── scanner.js         # Detecta 'use client'
-│
+mi-proyecto/
 ├── src/
 │   ├── layout.jsx         # HTML base (como Next.js)
+│   ├── input.css          # Tailwind entry
 │   ├── pages/             # Server components
+│   │   └── Home.jsx
 │   └── components/        # Server o client components
+│       └── Counter.jsx
 │
-├── server.js
-└── build.js
+├── server.js              # Tu servidor (el unico archivo que editas)
+└── package.json           # Scripts ya configurados
 ```
+
+`server.js` es el unico archivo que modificas para agregar rutas y logica.
 
 ## Server vs Client components
 
@@ -86,10 +96,9 @@ export default function About() {
 }
 ```
 
-**2.** Agregar la ruta:
+**2.** Agregar la ruta en `server.js`:
 
 ```js
-// server.js
 app.get('/about', async (req, res) => {
   const { default: About } = await import('./src/pages/About.jsx');
   res.send(renderPage(About, {}, { title: 'About' }));
@@ -118,7 +127,7 @@ Despues de agregar client components, correr `pnpm build`.
 ## Build
 
 ```
-pnpm build
+pnpm build  →  mini-ssr build (oculto, no hay build.js en tu proyecto)
     │
     ├──► Scanner busca 'use client' en src/
     │
