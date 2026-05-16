@@ -1,0 +1,30 @@
+{
+  "name": "mini-ssr",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Minimal React SSR framework with selective hydration",
+  "exports": {
+    ".": "./core/index.js",
+    "./loader": "./core/register-loader.js"
+  },
+  "scripts": {
+    "build": "node --import ./core/register-loader.js build.js",
+    "dev": "node --import ./core/register-loader.js build.js && node --import ./core/register-loader.js --watch server.js",
+    "start": "node --import ./core/register-loader.js server.js"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "peerDependencies": {
+    "express": ">=5.0.0",
+    "esbuild": ">=0.20.0",
+    "tailwindcss": ">=4.0.0",
+    "@tailwindcss/cli": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.7",
+    "esbuild": "^0.25.4",
+    "tailwindcss": "^4.1.7"
+  }
+}

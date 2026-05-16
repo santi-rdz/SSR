@@ -1,0 +1,7 @@
+node_modules/
+public/js/
+public/css/
+.tmp-entries/
+.claude/
+.agents/
+skills-lock.json
