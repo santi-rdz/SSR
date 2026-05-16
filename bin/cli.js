@@ -9,21 +9,28 @@ import { createInterface } from 'readline';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_DIR = path.join(__dirname, '..', 'template');
 const TARGET_DIR = process.cwd();
-
 const command = process.argv[2];
 
-if (command !== 'init') {
-  console.log('Usage: mini-ssr init');
+if (command === 'init') {
+  init();
+} else if (command === 'build') {
+  runBuild();
+} else {
+  console.log('Usage: mini-ssr <init|build>');
   process.exit(1);
 }
 
+// ── Build ──────────────────────────────────────────
+
+async function runBuild() {
+  const { build } = await import('../core/build.js');
+  await build(TARGET_DIR);
+}
+
+// ── Init ───────────────────────────────────────────
+
 const PEER_DEPS = ['express', 'esbuild', 'tailwindcss', '@tailwindcss/cli'];
 
-/**
- * Pregunta al usuario si/no.
- * @param {string} question
- * @returns {Promise<boolean>}
- */
 function ask(question) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => {
@@ -34,21 +41,12 @@ function ask(question) {
   });
 }
 
-/**
- * Detecta el package manager del proyecto.
- * @returns {string}
- */
 function detectPM() {
   if (fs.existsSync(path.join(TARGET_DIR, 'pnpm-lock.yaml'))) return 'pnpm';
   if (fs.existsSync(path.join(TARGET_DIR, 'yarn.lock'))) return 'yarn';
   return 'npm';
 }
 
-/**
- * Copia un directorio recursivamente, sin sobreescribir archivos existentes.
- * @param {string} src
- * @param {string} dest
- */
 function copyDir(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
 
@@ -70,23 +68,20 @@ function copyDir(src, dest) {
 async function init() {
   console.log('\nmini-ssr init\n');
 
-  // 1. Copiar template
   copyDir(TEMPLATE_DIR, TARGET_DIR);
 
-  // 2. Configurar package.json
   const pkgPath = path.join(TARGET_DIR, 'package.json');
   if (fs.existsSync(pkgPath)) {
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
     pkg.type = pkg.type || 'module';
     pkg.scripts = pkg.scripts || {};
-    pkg.scripts.build = pkg.scripts.build || 'node --import mini-ssr/loader build.js';
-    pkg.scripts.dev = pkg.scripts.dev || 'node --import mini-ssr/loader build.js && node --import mini-ssr/loader --watch server.js';
+    pkg.scripts.build = pkg.scripts.build || 'mini-ssr build';
+    pkg.scripts.dev = pkg.scripts.dev || 'mini-ssr build && node --import mini-ssr/loader --watch server.js';
     pkg.scripts.start = pkg.scripts.start || 'node --import mini-ssr/loader server.js';
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
     console.log('\n  + scripts agregados a package.json');
   }
 
-  // 3. Instalar dependencias
   const shouldInstall = await ask(`\nInstalar dependencias? (${PEER_DEPS.join(', ')}) [s/n] `);
 
   if (shouldInstall) {
@@ -100,5 +95,3 @@ async function init() {
   console.log('  pnpm build');
   console.log('  pnpm start\n');
 }
-
-init();
