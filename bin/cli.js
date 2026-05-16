@@ -29,7 +29,7 @@ async function runBuild() {
 
 // ── Init ───────────────────────────────────────────
 
-const PEER_DEPS = ['express', 'esbuild', 'tailwindcss', '@tailwindcss/cli'];
+const PEER_DEPS = ['react', 'react-dom', 'express', 'esbuild', 'tailwindcss', '@tailwindcss/cli'];
 
 function ask(question) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
