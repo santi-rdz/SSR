@@ -9,6 +9,8 @@ import { createInterface } from 'readline';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_DIR = path.join(__dirname, '..', 'template');
 const TARGET_DIR = process.cwd();
+const PEER_DEPS = ['react', 'react-dom', 'express', 'esbuild', 'tailwindcss', '@tailwindcss/cli'];
+
 const command = process.argv[2];
 
 if (command === 'init') {
@@ -28,8 +30,6 @@ async function runBuild() {
 }
 
 // ── Init ───────────────────────────────────────────
-
-const PEER_DEPS = ['react', 'react-dom', 'express', 'esbuild', 'tailwindcss', '@tailwindcss/cli'];
 
 function ask(question) {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
